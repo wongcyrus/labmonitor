@@ -1,0 +1,7 @@
+argh==0.26.2
+pathtools==0.1.2
+pynput==1.4
+python-xlib==0.23
+PyYAML==3.13
+six==1.11.0
+watchdog==0.8.3
