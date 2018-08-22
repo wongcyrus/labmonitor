@@ -9,8 +9,10 @@ file_hash = {}
 class Watcher:
     DIRECTORY_TO_WATCH = "/home/osboxes/PycharmProjects/ite3101_introduction_to_programming/lab"
 
-    def __init__(self):
+    def __init__(self, api, key):
         self.observer = Observer()
+        self.api = api
+        self.key = key
 
     def run(self):
         event_handler = Handler()
