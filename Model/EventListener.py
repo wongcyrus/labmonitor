@@ -6,12 +6,11 @@ class EventListener:
         self.q = q
 
     def on_move(self, x, y):
-        print('Pointer moved to {0}'.format(
-            (x, y)))
+        # print('Pointer moved to {0}'.format(
+        #     (x, y)))
         self.q.put(MoveEvent(x, y))
 
     def on_click(self, x, y, button, pressed):
-        print(button)
         print('{0} - {1} at {2}'.format(button,
                                         'Pressed' if pressed else 'Released',
                                         (x, y)))

@@ -1,3 +1,4 @@
+import datetime
 from json import JSONEncoder
 import pickle
 
@@ -20,16 +21,23 @@ def auto_str(cls):
     return cls
 
 
+class Event:
+    def __init__(self):
+        self.time = str(datetime.datetime.now())
+
+
 @auto_str
-class MoveEvent:
+class MoveEvent(Event):
     def __init__(self, x, y):
+        super().__init__()
         self.x = x
         self.y = y
 
 
 @auto_str
-class ClickEvent:
+class ClickEvent(Event):
     def __init__(self, x, y, button, pressed):
+        super().__init__()
         self.x = x
         self.y = y
         self.button = button
@@ -37,8 +45,9 @@ class ClickEvent:
 
 
 @auto_str
-class ScrollEvent:
+class ScrollEvent(Event):
     def __init__(self, x, y, dx, dy):
+        super().__init__()
         self.x = x
         self.y = y
         self.dx = dx
@@ -46,8 +55,9 @@ class ScrollEvent:
 
 
 @auto_str
-class KeyPressEvent:
+class KeyPressEvent(Event):
     def __init__(self, key):
+        super().__init__()
         try:
             self.key = str(key.char)
         except AttributeError:
@@ -55,8 +65,9 @@ class KeyPressEvent:
 
 
 @auto_str
-class KeyReleaseEvent:
+class KeyReleaseEvent(Event):
     def __init__(self, key):
+        super().__init__()
         try:
             self.key = str(key.char)
         except AttributeError:

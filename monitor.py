@@ -1,17 +1,17 @@
 # https://github.com/moses-palmer/pynput/issues/52
-import urllib
+import getopt
+import json
+import multiprocessing
+import sys
 from queue import Queue
+from threading import Thread
+from urllib import request
 
 from pynput import keyboard
 from pynput import mouse
 
-from threading import Thread
-import multiprocessing
-import sys, getopt
 from Model.EventListener import EventListener
 from Model.Watcher import Watcher
-from urllib import request, parse
-import json
 
 api = None
 key = None
@@ -26,22 +26,24 @@ def worker():
             events = []
             for i in range(queue_size):
                 item = q.get()
-                print("worker: " + str(item))
                 d = item.__dict__
                 d["event"] = item.__class__.__name__
                 events.append(item.__dict__)
                 q.task_done()
 
             try:
-                req = request.Request(api + "event", data=json.dumps(events).encode('utf8'))
+                data = json.dumps(events).encode('utf8')
+                print(data)
+                req = request.Request("https://" + api + "/event", data=data)
+                req.add_header("x-api-key", key)
                 resp = request.urlopen(req)
-                print(resp)
-            except Exception  as e:  # This is the correct syntax
+                print(str(resp.status) + " -" + resp.msg)
+            except Exception as e:
                 print(e)
 
 
 def file_monitor():
-    w = Watcher(api, key)
+    w = Watcher(api, key, "/home/osboxes/PycharmProjects/ite3101_introduction_to_programming/lab")
     w.run()
 
 
@@ -73,8 +75,10 @@ def main(argv):
         elif opt == '-k':
             global key
             key = arg
-    print('api is "', api)
-    print('key is "', key)
+
+    api = api.replace("https://", "").replace("http://", "")
+    print('api is ', api)
+    print('key is ', key)
 
     if api is None or key is None:
         sys.exit()
