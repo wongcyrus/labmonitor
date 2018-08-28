@@ -1,10 +1,11 @@
 import json
 import time
-from urllib import request
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import hashlib
+
+import requests
 
 file_hash = {}
 
@@ -44,11 +45,13 @@ class Handler(FileSystemEventHandler):
                 code = in_file.read()
             key = file_path.replace(self.directory_to_watch, "")
             data = {"key": key, "code": code}
-            req = request.Request("https://" + self.api + "/code", data=json.dumps(data).encode('utf8'))
-            req.add_header("x-api-key", self.key)
-            resp = request.urlopen(req)
-            print(str(resp.status) + " -" + resp.msg)
-
+            response = requests.post("https://" + self.api + "/code", data=json.dumps(data).encode('utf8'),
+                                     headers={"x-api-key": self.key})
+            if response.ok:
+                print(response.json()['test_result'])
+            else:
+                print(response.status_code)
+                print(response.reason)
         except Exception as e:
             print(e)
 

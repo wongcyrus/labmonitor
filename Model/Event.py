@@ -23,35 +23,35 @@ def auto_str(cls):
 
 class Event:
     def __init__(self):
-        self.time = str(datetime.datetime.now())
+        self.time: str = str(datetime.datetime.now())
 
 
 @auto_str
 class MoveEvent(Event):
-    def __init__(self, x, y):
+    def __init__(self, x: int, y: int):
         super().__init__()
-        self.x = x
-        self.y = y
+        self.x: int = x
+        self.y: int = y
 
 
 @auto_str
 class ClickEvent(Event):
-    def __init__(self, x, y, button, pressed):
+    def __init__(self, x: int, y: int, button, pressed):
         super().__init__()
-        self.x = x
-        self.y = y
-        self.button = button
-        self.pressed = pressed
+        self.x: int = x
+        self.y: int = y
+        self.button: str = button
+        self.pressed: str = pressed
 
 
 @auto_str
 class ScrollEvent(Event):
-    def __init__(self, x, y, dx, dy):
+    def __init__(self, x: int, y: int, dx: int, dy: int):
         super().__init__()
-        self.x = x
-        self.y = y
-        self.dx = dx
-        self.dy = dy
+        self.x: int = x
+        self.y: int = y
+        self.dx: int = dx
+        self.dy: int = dy
 
 
 @auto_str
@@ -59,9 +59,9 @@ class KeyPressEvent(Event):
     def __init__(self, key):
         super().__init__()
         try:
-            self.key = str(key.char)
+            self.key: str = str(key.char)
         except AttributeError:
-            self.key = str(key)
+            self.key: str = str(key)
 
 
 @auto_str
@@ -69,6 +69,6 @@ class KeyReleaseEvent(Event):
     def __init__(self, key):
         super().__init__()
         try:
-            self.key = str(key.char)
+            self.key: str = str(key.char)
         except AttributeError:
-            self.key = str(key)
+            self.key: str = str(key)

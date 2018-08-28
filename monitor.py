@@ -5,50 +5,57 @@ import multiprocessing
 import sys
 from queue import Queue
 from threading import Thread
-from urllib import request
 
+import requests
 from pynput import keyboard
 from pynput import mouse
 
 from Model.EventListener import EventListener
 from Model.Watcher import Watcher
 
-api = None
-key = None
 q = Queue()
+batch_limit = 50
 
 
-def worker():
+def worker(api, key):
     while True:
         queue_size = q.qsize()
-        if queue_size > 10:
+        if queue_size > batch_limit:
             print("Batch processing for " + str(queue_size) + " events")
             events = []
             for i in range(queue_size):
                 item = q.get()
-                d = item.__dict__
-                d["event"] = item.__class__.__name__
-                events.append(item.__dict__)
+                data = {}
+                for attr, value in item.__dict__.items():
+                    data[attr] = value
+                data["event"] = item.__class__.__name__
+                events.append(data)
                 q.task_done()
 
             try:
+                print("Json")
                 data = json.dumps(events).encode('utf8')
                 print(data)
-                req = request.Request("https://" + api + "/event", data=data)
-                req.add_header("x-api-key", key)
-                resp = request.urlopen(req)
-                print(str(resp.status) + " -" + resp.msg)
+
+                response = requests.post("https://" + api + "/event", data=data,
+                                         headers={"x-api-key": key})
+                if response.ok:
+                    print(response.json())
+                else:
+                    print(response.status_code)
+                    print(response.reason)
             except Exception as e:
                 print(e)
+                print(events)
 
 
-def file_monitor():
+def file_monitor(api, key):
     w = Watcher(api, key, "/home/osboxes/PycharmProjects/ite3101_introduction_to_programming/lab")
     w.run()
 
 
-def input_monitor():
-    t = Thread(target=worker)
+def input_monitor(api, key):
+    t = Thread(target=worker, args=(api, key,))
     t.start()
 
     event_listener = EventListener(q)
@@ -83,7 +90,8 @@ def main(argv):
     if api is None or key is None:
         sys.exit()
 
-    jobs = [multiprocessing.Process(target=file_monitor), multiprocessing.Process(target=input_monitor)]
+    jobs = [multiprocessing.Process(target=file_monitor, args=(api, key,)),
+            multiprocessing.Process(target=input_monitor, args=(api, key,))]
 
     # Start the processes (i.e. calculate the random number lists)
     for j in jobs:

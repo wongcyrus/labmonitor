@@ -1,3 +1,4 @@
+requests
 argh==0.26.2
 pathtools==0.1.2
 pynput==1.4
