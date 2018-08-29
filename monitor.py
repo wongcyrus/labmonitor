@@ -14,26 +14,25 @@ from Model.EventListener import EventListener
 from Model.Watcher import Watcher
 
 q = Queue()
-batch_limit = 50
+batch_limit = 100
 
 
 def worker(api, key):
     while True:
         queue_size = q.qsize()
-        if queue_size > batch_limit:
+        if queue_size >= batch_limit:
             print("Batch processing for " + str(queue_size) + " events")
             events = []
             for i in range(queue_size):
                 item = q.get()
                 data = {}
                 for attr, value in item.__dict__.items():
-                    data[attr] = value
+                    data[attr] = value if type(value) is int else str(value)
                 data["event"] = item.__class__.__name__
                 events.append(data)
                 q.task_done()
 
             try:
-                print("Json")
                 data = json.dumps(events).encode('utf8')
                 print(data)
 
@@ -46,11 +45,12 @@ def worker(api, key):
                     print(response.reason)
             except Exception as e:
                 print(e)
+                print(len(events))
                 print(events)
 
 
-def file_monitor(api, key):
-    w = Watcher(api, key, "/home/osboxes/PycharmProjects/ite3101_introduction_to_programming/lab")
+def file_monitor(api, key, monitor_dir):
+    w = Watcher(api, key, monitor_dir)
     w.run()
 
 
@@ -67,30 +67,39 @@ def input_monitor(api, key):
 
 
 def main(argv):
+    instruction = 'monitor.py -m <absolute path directory> -a <url> -k <apikey>'
+
+    api = None
+    key = None
+    monitor_dir = None
+
     try:
-        opts, args = getopt.getopt(argv, "a:k:")
+        opts, args = getopt.getopt(argv, "m:a:k:")
+
     except getopt.GetoptError:
-        print('monitor.py -a <url> -k <apikey>')
+        print(instruction)
         sys.exit(2)
+
     for opt, arg in opts:
         if opt == '-h':
-            print('monitor.py -a <url> -k <apikey>')
+            print(instruction)
             sys.exit()
+        elif opt == '-m':
+            monitor_dir = arg
         elif opt == '-a':
-            global api
             api = arg
+            api = api.replace("https://", "").replace("http://", "")
         elif opt == '-k':
-            global key
             key = arg
 
-    api = api.replace("https://", "").replace("http://", "")
-    print('api is ', api)
-    print('key is ', key)
+    print('api: ', api)
+    print('key: ', key)
+    print('monitoring directory: ', monitor_dir)
 
     if api is None or key is None:
         sys.exit()
 
-    jobs = [multiprocessing.Process(target=file_monitor, args=(api, key,)),
+    jobs = [multiprocessing.Process(target=file_monitor, args=(api, key, monitor_dir,)),
             multiprocessing.Process(target=input_monitor, args=(api, key,))]
 
     # Start the processes (i.e. calculate the random number lists)
