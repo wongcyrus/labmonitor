@@ -10,11 +10,11 @@ import requests
 from pynput import keyboard
 from pynput import mouse
 
-from Model.EventListener import EventListener
+from Model.EventListener import EventListener, GenericEvent
 from Model.Watcher import Watcher
 
 q = Queue()
-batch_limit = 100
+batch_limit = 500
 
 
 def worker(api, key):
@@ -25,11 +25,9 @@ def worker(api, key):
             events = []
             for i in range(queue_size):
                 item = q.get()
-                data = {}
-                for attr, value in item.__dict__.items():
-                    data[attr] = value if type(value) is int else str(value)
-                data["event"] = item.__class__.__name__
-                events.append(data)
+                generic_event = GenericEvent()
+                generic_event.copy(item)
+                events.append(generic_event.event)
                 q.task_done()
 
             try:

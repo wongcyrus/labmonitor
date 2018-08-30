@@ -21,6 +21,25 @@ def auto_str(cls):
     return cls
 
 
+class GenericEvent:
+    def __init__(self):
+        self.event = {
+            'x': 0,
+            'y': 0,
+            'dx': 0,
+            'dy': 0,
+            'time': str(datetime.datetime.now()),
+            'button': "",
+            "pressed": "",
+            "key": ""
+        }
+
+    def copy(self, event):
+        for attr, value in event.__dict__.items():
+            self.event[attr] = value if type(value) is int else str(value)
+            self.event["name"] = event.__class__.__name__
+
+
 class Event:
     def __init__(self):
         self.time: str = str(datetime.datetime.now())
