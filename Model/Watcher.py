@@ -4,6 +4,7 @@ import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import hashlib
+import platform
 
 import requests
 
@@ -12,14 +13,15 @@ file_hash = {}
 
 class Watcher:
 
-    def __init__(self, api, key, directory_to_watch):
+    def __init__(self, api: str, key: str, directory_to_watch: str, using_pycharm: bool):
         self.observer = Observer()
         self.api = api
         self.key = key
         self.directory_to_watch = directory_to_watch
+        self.using_pycharm = using_pycharm
 
     def run(self):
-        event_handler = Handler(self.api, self.key, self.directory_to_watch)
+        event_handler = Handler(self.api, self.key, self.directory_to_watch, self.using_pycharm)
         self.observer.schedule(event_handler, self.directory_to_watch, recursive=True)
         self.observer.start()
         try:
@@ -34,10 +36,11 @@ class Watcher:
 
 class Handler(FileSystemEventHandler):
 
-    def __init__(self, api, key, directory_to_watch):
+    def __init__(self, api: str, key: str, directory_to_watch: str, using_pycharm: bool):
         self.api = api
         self.key = key
         self.directory_to_watch = directory_to_watch
+        self.using_pycharm = using_pycharm
 
     def upload(self, file_path):
         try:
@@ -66,18 +69,23 @@ class Handler(FileSystemEventHandler):
     def on_any_event(self, event):
         if event.is_directory or not event.src_path.endswith(".py"):
             return None
-        elif event.event_type == 'modified':
-            print("Received modified event - %s." % event.src_path)
-            new_hash = self.sha256_checksum(event.src_path)
+        elif (not platform.release() == '10' and event.event_type == 'modified') or \
+                (self.using_pycharm and platform.release() == '10' and event.event_type == 'moved'):
+            # PyCharm in Windows 10 renames a tmp file when save.
+            path = event.dest_path if self.using_pycharm and platform.release() == '10' and event.dest_path.endswith(
+                ".py") else event.src_path
+            time.sleep(1)
+            print("Received modified event - %s." % path)
+            new_hash = self.sha256_checksum(path)
             print('\t' + new_hash)
-            if event.src_path in file_hash:
-                old_hash = file_hash.get(event.src_path)
+            if path in file_hash:
+                old_hash = file_hash.get(path)
                 if old_hash != new_hash:
-                    print("Code changed " + event.src_path)
-                    file_hash[event.src_path] = new_hash
-                    self.upload(event.src_path)
+                    print("Code changed " + path)
+                    file_hash[path] = new_hash
+                    self.upload(path)
             else:
                 print("First update")
-                file_hash[event.src_path] = new_hash
-                self.upload(event.src_path)
+                file_hash[path] = new_hash
+                self.upload(path)
         print(file_hash)

@@ -47,8 +47,8 @@ def worker(api, key):
                 print(events)
 
 
-def file_monitor(api, key, monitor_dir):
-    w = Watcher(api, key, monitor_dir)
+def file_monitor(api, key, monitor_dir, using_pycharm):
+    w = Watcher(api, key, monitor_dir, using_pycharm)
     w.run()
 
 
@@ -70,9 +70,10 @@ def main(argv):
     api = None
     key = None
     monitor_dir = None
+    using_pycharm = True
 
     try:
-        opts, args = getopt.getopt(argv, "m:a:k:")
+        opts, args = getopt.getopt(argv, "m:a:k:t:")
 
     except getopt.GetoptError:
         print(instruction)
@@ -89,15 +90,18 @@ def main(argv):
             api = api.replace("https://", "").replace("http://", "")
         elif opt == '-k':
             key = arg
+        elif opt == '-t':
+            using_pycharm = False
 
     print('api: ', api)
     print('key: ', key)
     print('monitoring directory: ', monitor_dir)
+    print('Using PyCharm: ', using_pycharm)
 
     if api is None or key is None:
         sys.exit()
 
-    jobs = [multiprocessing.Process(target=file_monitor, args=(api, key, monitor_dir,)),
+    jobs = [multiprocessing.Process(target=file_monitor, args=(api, key, monitor_dir, using_pycharm,)),
             multiprocessing.Process(target=input_monitor, args=(api, key,))]
 
     # Start the processes (i.e. calculate the random number lists)
