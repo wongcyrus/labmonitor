@@ -21,6 +21,14 @@ def auto_str(cls):
     return cls
 
 
+@auto_str
+class ProcessEvent:
+
+    def __init__(self, proc, now, is_killed):
+        self.event = {'name': str(proc.info['name']), 'pid': str(proc.info['pid']), 'time': (str(now)),
+                      "is_killed": is_killed}
+
+
 class GenericEvent:
     def __init__(self):
         self.event = {

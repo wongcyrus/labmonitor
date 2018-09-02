@@ -15,15 +15,7 @@ class EventListener:
         self.q.put(ScrollEvent(x, y, dx, dy))
 
     def on_press(self, key):
-        try:
-            print('alphanumeric key {0} pressed'.format(
-                key.char))
-        except AttributeError:
-            print('special key {0} pressed'.format(
-                key))
         self.q.put(KeyPressEvent(key))
 
     def on_release(self, key):
-        print('{0} released'.format(
-            key))
         self.q.put(KeyReleaseEvent(key))

@@ -6,3 +6,4 @@ python-xlib==0.23
 PyYAML==3.13
 six==1.11.0
 watchdog==0.8.3
+psutil==5.4.7

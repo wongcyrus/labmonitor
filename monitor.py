@@ -1,50 +1,18 @@
 # https://github.com/moses-palmer/pynput/issues/52
 import getopt
-import json
 import multiprocessing
 import sys
 from queue import Queue
-from threading import Thread
 
-import requests
 from pynput import keyboard
 from pynput import mouse
 
-from Model.EventListener import EventListener, GenericEvent
+from Model.EventListener import EventListener
+from Model.InputMonitor import InputMonitor
+from Model.ProcessMonitor import ProcessMonitor
 from Model.Watcher import Watcher
 
 q = Queue()
-batch_limit = 500
-
-
-def worker(api, key):
-    while True:
-        queue_size = q.qsize()
-        if queue_size >= batch_limit:
-            print("Batch processing for " + str(queue_size) + " events")
-            events = []
-            for i in range(queue_size):
-                item = q.get()
-                generic_event = GenericEvent()
-                generic_event.copy(item)
-                events.append(generic_event.event)
-                q.task_done()
-
-            try:
-                data = json.dumps(events).encode('utf8')
-                print(data)
-
-                response = requests.post("https://" + api + "/event", data=data,
-                                         headers={"x-api-key": key})
-                if response.ok:
-                    print(response.json())
-                else:
-                    print(response.status_code)
-                    print(response.reason)
-            except Exception as e:
-                print(e)
-                print(len(events))
-                print(events)
 
 
 def file_monitor(api, key, monitor_dir, using_pycharm):
@@ -53,8 +21,9 @@ def file_monitor(api, key, monitor_dir, using_pycharm):
 
 
 def input_monitor(api, key):
-    t = Thread(target=worker, args=(api, key,))
-    t.start()
+    q = Queue()
+    im = InputMonitor(api, key, q)
+    im.start()
 
     event_listener = EventListener(q)
 
@@ -62,6 +31,11 @@ def input_monitor(api, key):
                         on_scroll=event_listener.on_scroll) as listener:
         with keyboard.Listener(on_press=event_listener.on_press, on_release=event_listener.on_release) as listener:
             listener.join()
+
+
+def process_monitor(api, key):
+    pm = ProcessMonitor(api, key)
+    pm.start()
 
 
 def main(argv):
@@ -102,7 +76,9 @@ def main(argv):
         sys.exit()
 
     jobs = [multiprocessing.Process(target=file_monitor, args=(api, key, monitor_dir, using_pycharm,)),
-            multiprocessing.Process(target=input_monitor, args=(api, key,))]
+            multiprocessing.Process(target=input_monitor, args=(api, key,)),
+            multiprocessing.Process(target=process_monitor, args=(api, key,))
+            ]
 
     # Start the processes (i.e. calculate the random number lists)
     for j in jobs:
@@ -111,8 +87,6 @@ def main(argv):
     # Ensure all of the processes have finished
     for j in jobs:
         j.join()
-
-    print("List processing complete.")
 
 
 if __name__ == '__main__':
