@@ -31,11 +31,13 @@ def input_monitor(api, key):
                         on_scroll=event_listener.on_scroll) as listener:
         with keyboard.Listener(on_press=event_listener.on_press, on_release=event_listener.on_release) as listener:
             listener.join()
+    im.join()
 
 
 def process_monitor(api, key):
     pm = ProcessMonitor(api, key)
     pm.start()
+    pm.join()
 
 
 def main(argv):

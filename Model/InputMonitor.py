@@ -34,10 +34,9 @@ class InputMonitor(threading.Thread):
 
                 try:
                     data = json.dumps(events).encode('utf8')
-                    print(data)
-
+                    print("https://" + self.api + "/event")
                     response = requests.post("https://" + self.api + "/event", data=data,
-                                             headers={"x-api-key": self.api})
+                                             headers={"x-api-key": self.key})
                     if response.ok:
                         print(response.json())
                     else:

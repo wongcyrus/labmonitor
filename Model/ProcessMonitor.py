@@ -19,32 +19,27 @@ class ProcessMonitor(threading.Thread):
         self.black_list_process = []
 
     def run(self):
-        try:
-            while True:
-                running_process = []
-                for proc in psutil.process_iter(attrs=['pid', 'name']):
-                    print(proc)
-                    if proc.info['name'] in self.black_list_process:
-                        print("killed ", proc.info)
-                        proc.kill()
-                        ps = ProcessEvent(proc, datetime.datetime.now(), True)
-                    else:
-                        ps = ProcessEvent(proc, datetime.datetime.now(), False)
-                    running_process.append(ps.event)
-                try:
-                    data = json.dumps(running_process).encode('utf8')
+        while True:
+            running_process = []
+            for proc in psutil.process_iter(attrs=['pid', 'name']):
+                if proc.info['name'] in self.black_list_process:
+                    print("killed ", proc.info)
+                    proc.kill()
+                    ps = ProcessEvent(proc, datetime.datetime.now(), True)
+                else:
+                    ps = ProcessEvent(proc, datetime.datetime.now(), False)
+                running_process.append(ps.event)
+            try:
+                data = json.dumps(running_process).encode('utf8')
 
-                    response = requests.post("https://" + self.api + "/process", data=data,
-                                             headers={"x-api-key": self.key})
-                    if response.ok:
-                        print("Process uploaded!")
-                        self.black_list_process = list(map(lambda x: x.strip(), response.json().split(",")))
-                    else:
-                        print(response.status_code)
-                        print(response.reason)
-                except Exception as e:
-                    print(e)
+                response = requests.post("https://" + self.api + "/process", data=data,
+                                         headers={"x-api-key": self.key})
+                if response.ok:
+                    self.black_list_process = list(map(lambda x: x.strip(), response.json().split(",")))
+                else:
+                    print(response.status_code)
+                    print(response.reason)
+            except Exception as e:
+                print(e)
+            sleep(5)
 
-                sleep(1)
-        except Exception as ex:
-            print(ex)
