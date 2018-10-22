@@ -10,6 +10,7 @@ from pynput import mouse
 from Model.EventListener import EventListener
 from Model.InputMonitor import InputMonitor
 from Model.ProcessMonitor import ProcessMonitor
+from Model.Screenshot import Screenshot
 from Model.Watcher import Watcher
 
 q = Queue()
@@ -32,6 +33,12 @@ def input_monitor(api, key):
         with keyboard.Listener(on_press=event_listener.on_press, on_release=event_listener.on_release) as listener:
             listener.join()
     im.join()
+
+
+def screenshot(api, key):
+    s = Screenshot(api, key)
+    s.start()
+    s.join()
 
 
 def process_monitor(api, key):
@@ -79,6 +86,7 @@ def main(argv):
 
     jobs = [multiprocessing.Process(target=file_monitor, args=(api, key, monitor_dir, using_pycharm,)),
             multiprocessing.Process(target=input_monitor, args=(api, key,)),
+            multiprocessing.Process(target=screenshot, args=(api, key,)),
             multiprocessing.Process(target=process_monitor, args=(api, key,))
             ]
 

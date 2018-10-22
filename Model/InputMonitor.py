@@ -16,7 +16,7 @@ class InputMonitor(threading.Thread):
         self.api = api
         self.key = key
         self.queue = queue
-        self.batch_limit = 500
+        self.batch_limit = 1000
 
     def run(self):
         while True:
@@ -34,7 +34,6 @@ class InputMonitor(threading.Thread):
 
                 try:
                     data = json.dumps(events).encode('utf8')
-                    print("https://" + self.api + "/event")
                     response = requests.post("https://" + self.api + "/event", data=data,
                                              headers={"x-api-key": self.key})
                     if response.ok:
