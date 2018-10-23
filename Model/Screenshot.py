@@ -1,3 +1,4 @@
+import os
 import threading
 import pyautogui
 import requests
@@ -16,7 +17,7 @@ class Screenshot(threading.Thread):
     def run(self):
         while True:
             try:
-                response = requests.post("https://" + self.api + "/screenshot",
+                response = requests.get("https://" + self.api + "/screenshot",
                                          headers={"x-api-key": self.key})
                 # Take screenshot
                 pic = pyautogui.screenshot()
@@ -29,7 +30,7 @@ class Screenshot(threading.Thread):
                     upload = response.json()
                     upload_screenshot = requests.post(upload['url'], data=upload['fields'], files=files)
                     print('screen shot uploaded!')
-
+                    os.remove(file_name)
                 else:
                     print(response.status_code)
                     print(response.reason)
