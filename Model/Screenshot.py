@@ -28,7 +28,8 @@ class Screenshot(threading.Thread):
                     with open(file_name, "rb") as image_file:
                         files = {'file': (file_name, image_file, 'image/jpeg', {'Expires': '0'})}
                         upload = response.json()
-                        upload_screenshot = requests.post(upload['url'], data=upload['fields'], files=files)
+                        url = upload['url'].replace("s3.amazonaws.com","s3-accelerate.amazonaws.com")
+                        upload_screenshot = requests.post(url, data=upload['fields'], files=files)
                         print('screen shot uploaded!')
                     os.remove(file_name)
                 else:
