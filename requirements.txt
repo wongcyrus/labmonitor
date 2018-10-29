@@ -12,7 +12,7 @@ PyScreeze==0.1.18
 python-xlib==0.23
 PyTweening==1.0.3
 PyYAML==3.13
-requests==2.19.1
+requests==2.20.0
 six==1.11.0
 urllib3==1.23
 watchdog==0.8.3
