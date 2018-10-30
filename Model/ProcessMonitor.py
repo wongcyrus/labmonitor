@@ -22,7 +22,8 @@ class ProcessMonitor(threading.Thread):
         count = 0
         while True:
             running_process = []
-            for proc in psutil.process_iter(attrs=['pid', 'name']):
+            for proc in psutil.process_iter(
+                    attrs=['pid', 'name', 'cpu_times', 'memory_percent', 'memory_info', 'io_counters']):
                 if proc.info['name'] in self.black_list_process:
                     print("killed ", proc.info)
                     proc.kill()

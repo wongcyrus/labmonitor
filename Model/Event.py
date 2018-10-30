@@ -23,9 +23,13 @@ def auto_str(cls):
 
 @auto_str
 class ProcessEvent:
-
     def __init__(self, proc, now, is_killed):
-        self.event = {'name': str(proc.info['name']), 'pid': str(proc.info['pid']), 'time': (str(now)),
+        self.event = {'name': str(proc.info['name']), 'pid': str(proc.info['pid']),
+                      'cpu_times': str(proc.info['cpu_times']),
+                      'memory_percent': str(proc.info['memory_percent']),
+                      'memory_info': str(proc.info['memory_info']),
+                      'io_counters': str(proc.info['io_counters']),
+                      'time': (str(now)),
                       "is_killed": is_killed}
 
 
