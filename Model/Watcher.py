@@ -1,12 +1,11 @@
+import hashlib
 import json
+import platform
 import time
 
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
-import hashlib
-import platform
-
 import requests
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 file_hash = {}
 

@@ -1,6 +1,6 @@
 import datetime
-from json import JSONEncoder
 import pickle
+from json import JSONEncoder
 
 
 def _default(self, obj):
@@ -31,6 +31,15 @@ class ProcessEvent:
                       'io_counters': str(proc.info['io_counters']),
                       'time': (str(now)),
                       "is_killed": is_killed}
+
+    def __hash__(self):
+        return self.event["pid"]
+
+    def __eq__(self, other):
+        return self.event["pid"] == other.event["pid"]
+
+    def __ge__(self, other):
+        return self.event["pid"] > other.event["pid"]
 
 
 class GenericEvent:

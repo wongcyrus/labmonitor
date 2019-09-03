@@ -1,11 +1,11 @@
 import json
 import threading
+from queue import Queue
 from time import sleep
 
 import requests
 
 from Model.Event import GenericEvent
-from queue import Queue
 
 
 class InputMonitor(threading.Thread):
