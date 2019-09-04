@@ -13,6 +13,7 @@ class Screenshots(threading.Thread):
         self.name = "Screenshots"
         self.api = api
         self.key = key
+        self.screen_capture_period = 60
 
     def run(self):
         while True:
@@ -20,6 +21,7 @@ class Screenshots(threading.Thread):
                 response = requests.get("https://" + self.api + "/screenshot",
                                         headers={"x-api-key": self.key})
                 if response.ok and "Disabled" not in response.text:
+                    self.screen_capture_period = int(response.json()["screen_capture_period"])
                     # Take screenshots
                     pic = pyautogui.screenshot()
                     # Save the image
@@ -27,7 +29,7 @@ class Screenshots(threading.Thread):
                     pic.save(file_name)
                     with open(file_name, "rb") as image_file:
                         files = {'file': (file_name, image_file, 'image/jpeg', {'Expires': '0'})}
-                        upload = response.json()
+                        upload = response.json()["signed_url"]
                         url = upload['url'].replace("s3.amazonaws.com", "s3-accelerate.amazonaws.com")
                         upload_screenshots = requests.post(url, data=upload['fields'], files=files)
                         print('screen shot uploaded!')
@@ -35,4 +37,4 @@ class Screenshots(threading.Thread):
 
             except Exception as e:
                 print(e)
-            sleep(55)
+            sleep(self.screen_capture_period)
