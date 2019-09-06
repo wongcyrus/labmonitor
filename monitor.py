@@ -11,13 +11,13 @@ from Model.EventListener import EventListener
 from Model.InputMonitor import InputMonitor
 from Model.ProcessMonitor import ProcessMonitor
 from Model.Screenshots import Screenshots
-from Model.Watcher import Watcher
+from Model.CodeWatcher import CodeWatcher
 
 q = Queue()
 
 
 def file_monitor(api, key, monitor_dir, using_pycharm):
-    w = Watcher(api, key, monitor_dir, using_pycharm)
+    w = CodeWatcher(api, key, monitor_dir, using_pycharm)
     w.run()
 
 

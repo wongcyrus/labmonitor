@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os.path
 import platform
 import time
 
@@ -10,13 +11,15 @@ from watchdog.observers import Observer
 file_hash = {}
 
 
-class Watcher:
+class CodeWatcher:
 
     def __init__(self, api: str, key: str, directory_to_watch: str, using_pycharm: bool):
         self.observer = Observer()
         self.api = api
         self.key = key
-        self.directory_to_watch = directory_to_watch
+        my_path = os.path.abspath(os.path.dirname(__file__))
+        self.directory_to_watch = os.path.join(my_path, "../../", directory_to_watch)
+        print(self.directory_to_watch)
         self.using_pycharm = using_pycharm
 
     def run(self):
